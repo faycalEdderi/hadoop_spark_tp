@@ -1,0 +1,68 @@
+# Ignore Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+ENV/
+
+# Ignore IntelliJ IDEA, Eclipse, VSCode, and other IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+
+# Ignore Hadoop and Spark logs and temp files
+*.log
+*.out
+*.tmp
+*.swp
+*.bak
+*.pid
+*.crc
+*.eventlog
+
+# Ignore Hadoop HDFS and Spark output directories
+myhadoop/
+
+# Ignore Docker-related files
+*.pid
+*.seed
+*.pid.lock
+
+# Ignore Docker volumes and data
+mongo-data/
+hadoop_namenode/
+hadoop_datanode/
+hadoop_historyserver/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore other common files
+*.tar.gz
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Ignore logs
+logs/
+
+# Ignore build artifacts
+dist/
+build/
+
+# Ignore environment files
+.env
+*.env
