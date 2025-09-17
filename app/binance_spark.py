@@ -1,9 +1,9 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, min, max
 import requests
 from datetime import datetime
 
 symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
-
 data = []
 for symbol in symbols:
     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
@@ -18,8 +18,14 @@ spark = SparkSession.builder \
 
 df = spark.createDataFrame(data, ["symbol", "price", "timestamp"])
 
-df.show()
+summary_df = df.groupBy("symbol").agg(
+    avg("price").alias("avg_price"),
+    min("price").alias("min_price"),
+    max("price").alias("max_price")
+)
 
-df.write.format("mongodb").mode("append").save()
+summary_df.show()
+
+summary_df.write.format("mongodb").mode("append").save()
 
 spark.stop()
