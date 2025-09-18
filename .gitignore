@@ -1,13 +1,17 @@
-# Ignore Python cache and virtual environments
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-env/
-venv/
-ENV/
+# ========================
+# Backend Python
+# ========================
 
-# Ignore IntelliJ IDEA, Eclipse, VSCode, and other IDE files
+# Python cache and virtual environments
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/env/
+backend/venv/
+backend/ENV/
+
+# IDE files
 .idea/
 *.iml
 *.ipr
@@ -17,7 +21,7 @@ ENV/
 .classpath
 .settings/
 
-# Ignore Hadoop and Spark logs and temp files
+# Logs and temp files
 *.log
 *.out
 *.tmp
@@ -27,28 +31,23 @@ ENV/
 *.crc
 *.eventlog
 
-# Ignore Hadoop HDFS and Spark output directories
+# Hadoop HDFS and Spark output
 myhadoop/
-
-# Ignore Docker-related files
-*.pid
-*.seed
-*.pid.lock
-
-# Ignore Docker volumes and data
-mongo-data/
 hadoop_namenode/
 hadoop_datanode/
 hadoop_historyserver/
 
-# Ignore Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Docker volumes and MongoDB data
+mongo-data/
 
-# Ignore OS generated files
+# Jupyter
+backend/.ipynb_checkpoints/
+
+# OS generated
 .DS_Store
 Thumbs.db
 
-# Ignore other common files
+# Archives
 *.tar.gz
 *.zip
 *.tar
@@ -56,13 +55,35 @@ Thumbs.db
 *.rar
 *.7z
 
-# Ignore logs
-logs/
+# Environment files
+backend/.env
+backend/*.env
 
-# Ignore build artifacts
-dist/
-build/
+# ========================
+# Frontend React
+# ========================
 
-# Ignore environment files
-.env
-*.env
+# Node modules
+frontend/node_modules/
+
+# Build output
+frontend/build/
+frontend/dist/
+
+# Local env files
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Debug logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# nodes modules
+frontend/node_modules/
+backend/node_modules/
+
+hadoop.env
