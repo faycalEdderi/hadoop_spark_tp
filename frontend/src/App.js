@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ScatterChart, Scatter } from 'recharts';
 import './App.css';
 
 function App() {
@@ -13,13 +13,15 @@ function App() {
         const data = res.data;
 
         const validSymbols = data.filter(d => d.symbol && d.avg_price !== undefined && d.min_price !== undefined && d.max_price !== undefined);
-        const validCategories = data.filter(d => d.category && (d.avg_price !== undefined || d.volatility !== undefined));
+        const validCategories = data.filter(d => d.category && d.avg_price !== undefined);
 
         setSymbolsData(validSymbols);
         setCategoryData(validCategories);
       })
       .catch(err => console.error(err));
   }, []);
+
+  const memeCoins = symbolsData.filter(s => !['BTCUSDT', 'ETHUSDT'].includes(s.symbol));
 
   return (
     <div className="App">
@@ -51,7 +53,9 @@ function App() {
         </tbody>
       </table>
 
-      <h2>Stats par catégorie</h2>
+      <h2><img src="/bitcoin-btc-logo.png" alt="Bitcoin" style={{ width: 50, verticalAlign: 'middle', marginRight: 10 }} />
+      Stats par catégorie&nbsp;
+      <img src="/pepe-pepe-logo.png" alt="Pepe" style={{ width: 50, verticalAlign: 'middle', marginRight: 10 }} /></h2>
       <BarChart width={800} height={400} data={categoryData}>
         <CartesianGrid stroke="#f5f5f5" />
         <XAxis dataKey="category" />
@@ -59,8 +63,18 @@ function App() {
         <Tooltip />
         <Legend />
         <Bar dataKey="avg_price" fill="#ff7300" />
-        <Bar dataKey="volatility" fill="#00ff73" />
       </BarChart>
+
+      <h2><img src="/shiba-inu-shib-logo.png" alt="Shiba Inu" style={{ width: 50, verticalAlign: 'middle', marginRight: 10 }} />
+      Volatilité des Meme Coins&nbsp;
+      <img src="/bonk1-bonk-logo.png" alt="Bonk" style={{ width: 50, verticalAlign: 'middle', marginRight: 10 }} /></h2>
+      <ScatterChart width={800} height={400}>
+        <CartesianGrid stroke="#f5f5f5" />
+        <XAxis type="category" dataKey="symbol" name="Symbol" />
+        <YAxis type="number" dataKey="avg_price" name="Avg Price" />
+        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+        <Scatter name="Price Range" data={memeCoins} fill="#ff0000" shape="circle" />
+      </ScatterChart>
     </div>
   );
 }
