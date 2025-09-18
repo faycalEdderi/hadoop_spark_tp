@@ -1,13 +1,13 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, avg, min, max, lag, when, stddev
+from pyspark.sql.functions import col, lag, when, stddev
 from pyspark.sql.window import Window
 import requests
 from datetime import datetime
 
-mongo_uri = "mongodb://mongo:27017/binance.prices"
+mongo_uri = "mongodb://mongo:27017/binance"
 
 solid = ["BTCUSDT", "ETHUSDT"]
-symbols = ["BTCUSDT","SHIBUSDT", "DOGEUSDT","TRUMPUSDT","ETHUSDT","PEPEUSDT","BONKUSDT", "PENGUUSDT"]
+symbols = ["BTCUSDT","SHIBUSDT","DOGEUSDT","TRUMPUSDT","ETHUSDT","PEPEUSDT","BONKUSDT", "PENGUUSDT"]
 
 data = []
 for symbol in symbols:
@@ -24,39 +24,35 @@ spark = SparkSession.builder \
 df = spark.createDataFrame(data, ["symbol", "price", "timestamp"])
 df = df.withColumn("category", when(col("symbol").isin(solid), "solid").otherwise("meme"))
 
+# sauvegarde du snapshot actuel
+df.write.format("mongodb") \
+    .mode("append") \
+    .option("collection", "prices") \
+    .save()
+
 window = Window.partitionBy("symbol").orderBy("timestamp")
 df_with_variation = df.withColumn("previous_price", lag("price").over(window)) \
                       .withColumn("variation", col("price") - col("previous_price"))
 
-summary_df = df.groupBy("symbol").agg(
-    avg("price").alias("avg_price"),
-    min("price").alias("min_price"),
-    max("price").alias("max_price")
-)
+summary_df = df.withColumnRenamed("price", "avg_price") \
+               .withColumn("min_price", col("avg_price")) \
+               .withColumn("max_price", col("avg_price"))
 
-ranking_df = df_with_variation.groupBy("symbol") \
-    .agg((max("price") - min("price")).alias("price_range")) \
-    .filter(col("price_range") > 0) \
-    .orderBy(col("price_range").desc())
+ranking_df = df_with_variation.withColumn("price_range", col("variation"))
 
 category_summary = df.groupBy("category").agg(
-    avg("price").alias("avg_price"),
-    min("price").alias("min_price"),
-    max("price").alias("max_price")
+    col("price").alias("avg_price"),
+    col("price").alias("min_price"),
+    col("price").alias("max_price")
 )
 
 volatility_df = df_with_variation.groupBy("category").agg(
     stddev("variation").alias("volatility")
 ).filter(col("volatility").isNotNull())
 
-summary_df.show()
-ranking_df.show()
-category_summary.show()
-volatility_df.show()
-
-summary_df.write.format("mongodb").mode("append").save()
-ranking_df.write.format("mongodb").mode("append").save()
-category_summary.write.format("mongodb").mode("append").save()
-volatility_df.write.format("mongodb").mode("append").save()
+summary_df.write.format("mongodb").mode("overwrite").option("collection", "summary").save()
+ranking_df.write.format("mongodb").mode("overwrite").option("collection", "ranking").save()
+category_summary.write.format("mongodb").mode("overwrite").option("collection", "category_summary").save()
+volatility_df.write.format("mongodb").mode("overwrite").option("collection", "volatility").save()
 
 spark.stop()
