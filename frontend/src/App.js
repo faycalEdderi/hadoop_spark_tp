@@ -42,14 +42,26 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {symbolsData.map((item, idx) => (
-            <tr key={idx}>
-              <td>{item.symbol}</td>
-              <td>{item.avg_price}</td>
-              <td>{item.min_price}</td>
-              <td>{item.max_price}</td>
-            </tr>
-          ))}
+          {symbolsData
+            .filter(item => ["BTCUSDT", "ETHUSDT"].includes(item.symbol))
+            .map((item, idx) => (
+              <tr key={`stable-${idx}`}>
+                <td>{item.symbol}</td>
+                <td>{item.avg_price}</td>
+                <td>{item.min_price}</td>
+                <td>{item.max_price}</td>
+              </tr>
+            ))}
+          {symbolsData
+            .filter(item => !["BTCUSDT", "ETHUSDT"].includes(item.symbol))
+            .map((item, idx) => (
+              <tr key={`meme-${idx}`}>
+                <td>{item.symbol}</td>
+                <td>{item.avg_price}</td>
+                <td>{item.min_price}</td>
+                <td>{item.max_price}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
