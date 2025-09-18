@@ -12,10 +12,7 @@ function App() {
       .then(res => {
         const data = res.data;
 
-        // Filtrer symbols valides (avec avg_price, min_price, max_price)
         const validSymbols = data.filter(d => d.symbol && d.avg_price !== undefined && d.min_price !== undefined && d.max_price !== undefined);
-
-        // Filtrer categories valides (avec avg_price et min/max ou volatility)
         const validCategories = data.filter(d => d.category && (d.avg_price !== undefined || d.volatility !== undefined));
 
         setSymbolsData(validSymbols);
@@ -28,14 +25,14 @@ function App() {
     <div className="App">
       <h1>Meme Crypto Dashboard 🚀💎</h1>
 
-      <h2>Cryptos par symbol</h2>
+      <h2>Cryptos</h2>
       <table>
         <thead>
           <tr>
             <th>Symbol</th>
-            <th>Avg Price</th>
-            <th>Min Price</th>
-            <th>Max Price</th>
+            <th>Avg Price (USD)</th>
+            <th>Min Price (USD)</th>
+            <th>Max Price (USD)</th>
           </tr>
         </thead>
         <tbody>

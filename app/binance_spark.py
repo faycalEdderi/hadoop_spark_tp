@@ -1,30 +1,20 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, avg, min, max, lag, when
+from pyspark.sql.functions import col, avg, min, max, lag, when, stddev
+from pyspark.sql.window import Window
 import requests
 from datetime import datetime
-from pyspark.sql.window import Window
-from pyspark.sql.functions import stddev
-import os
-from dotenv import load_dotenv
 
-load_dotenv("/.env")
-MONGO_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME")
-MONGO_PASS = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
-MONGO_HOST = os.getenv("MONGO_HOST")
-MONGO_DB = os.getenv("MONGO_DB")
-MONGO_COLLECTION = os.getenv("MONGO_COLLECTION")
+mongo_uri = "mongodb://mongo:27017/binance.prices"
 
 solid = ["BTCUSDT", "ETHUSDT"]
 symbols = ["BTCUSDT","SHIBUSDT", "DOGEUSDT","TRUMPUSDT","ETHUSDT","PEPEUSDT","BONKUSDT", "PENGUUSDT"]
-data = []
 
+data = []
 for symbol in symbols:
     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
     resp = requests.get(url).json()
     record = (resp["symbol"], float(resp["price"]), datetime.utcnow().isoformat())
     data.append(record)
-
-mongo_uri = "mongodb://mongo:27017/binance.prices"
 
 spark = SparkSession.builder \
     .appName("BinanceToMongo") \
@@ -35,7 +25,6 @@ df = spark.createDataFrame(data, ["symbol", "price", "timestamp"])
 df = df.withColumn("category", when(col("symbol").isin(solid), "solid").otherwise("meme"))
 
 window = Window.partitionBy("symbol").orderBy("timestamp")
-
 df_with_variation = df.withColumn("previous_price", lag("price").over(window)) \
                       .withColumn("variation", col("price") - col("previous_price"))
 
@@ -47,6 +36,7 @@ summary_df = df.groupBy("symbol").agg(
 
 ranking_df = df_with_variation.groupBy("symbol") \
     .agg((max("price") - min("price")).alias("price_range")) \
+    .filter(col("price_range") > 0) \
     .orderBy(col("price_range").desc())
 
 category_summary = df.groupBy("category").agg(
@@ -57,7 +47,7 @@ category_summary = df.groupBy("category").agg(
 
 volatility_df = df_with_variation.groupBy("category").agg(
     stddev("variation").alias("volatility")
-)
+).filter(col("volatility").isNotNull())
 
 summary_df.show()
 ranking_df.show()
