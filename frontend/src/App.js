@@ -23,7 +23,11 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Meme Crypto Dashboard 🚀💎</h1>
+      <h1>
+        <img src="/bitcoin-btc-logo.png" alt="Bitcoin" style={{ width: 50, verticalAlign: 'middle', marginRight: 10 }} />
+        Meme Crypto Dashboard
+        <img src="/ethereum-eth-logo.png" alt="Ethereum" style={{ width: 50, verticalAlign: 'middle', marginLeft: 10 }} />
+      </h1>
 
       <h2>Cryptos</h2>
       <table>
