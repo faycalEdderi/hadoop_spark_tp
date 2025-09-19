@@ -14,8 +14,20 @@ function App() {
   const [volatilityData, setVolatilityData] = useState([]);
   const [categorySummary, setCategorySummary] = useState([]);
   const [summaryData, setSummaryData] = useState([]);
+  const [pricesFromHdfs, setPricesFromHdfs] = useState([]);
+
 
   useEffect(() => {
+    axios.get('http://localhost:5000/api/prices_from_hdfs')
+  .then(res => {
+    const data = res.data.map(d => ({
+      ...d,
+      price: parseFloat(d.price),
+      timestamp: new Date(d.timestamp).toLocaleString()
+    }));
+    setPricesFromHdfs(data);
+  })
+  .catch(console.error);
     axios.get('http://localhost:5000/api/prices')
       .then(res => {
         const data = res.data.map(d => ({
@@ -239,7 +251,33 @@ function App() {
         </ScatterChart>
       </ResponsiveContainer>
 
+      {pricesFromHdfs.length > 0 && (
+        <>
+          <h2 style={{ marginTop: '50px', color: '#28a745' }}>
+            💾 Données chargées depuis HDFS via Spark
+          </h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f8f9fa' }}>
+                <th style={{ border: '1px solid #ddd', padding: '8px' }}>Symbol</th>
+                <th style={{ border: '1px solid #ddd', padding: '8px' }}>Price (USD)</th>
+                <th style={{ border: '1px solid #ddd', padding: '8px' }}>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pricesFromHdfs.map((item, idx) => (
+                <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#f8f9fa' }}>
+                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.symbol}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>${item.price.toFixed(5)}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.timestamp}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </div>
+    
   );
 }
 

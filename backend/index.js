@@ -69,6 +69,16 @@ app.get('/api/volatility', async (req, res) => {
   }
 });
 
+app.get('/api/prices_from_hdfs', async (req, res) => {
+  try {
+    const collection = db.collection('prices_from_hdfs');
+    const data = await collection.find({}).sort({ timestamp: -1 }).limit(50).toArray();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
