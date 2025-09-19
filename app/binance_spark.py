@@ -4,10 +4,10 @@ from pyspark.sql.window import Window
 import requests
 from datetime import datetime
 
-mongo_uri_base = "mongodb://mongo:27017/binance"
+mongo_uri_base = "mongodb://mongo:27017"
 
 solid = ["BTCUSDT", "ETHUSDT"]
-symbols = ["BTCUSDT","SHIBUSDT", "DOGEUSDT","TRUMPUSDT","ETHUSDT","PEPEUSDT","BONKUSDT", "PENGUUSDT"]
+symbols = ["SHIBUSDT", "DOGEUSDT", "TRUMPUSDT", "PEPEUSDT", "BONKUSDT", "PENGUUSDT"]
 
 data = []
 for symbol in symbols:
@@ -18,7 +18,8 @@ for symbol in symbols:
 
 spark = SparkSession.builder \
     .appName("BinanceToMongo") \
-    .config("spark.mongodb.write.connection.uri", mongo_uri_base) \
+    .config("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.prices") \
+    .config("spark.mongodb.read.connection.uri", mongo_uri_base + "/binance.prices") \
     .getOrCreate()
 
 df = spark.createDataFrame(data, ["symbol", "price", "timestamp"]) \
@@ -28,11 +29,14 @@ df = spark.createDataFrame(data, ["symbol", "price", "timestamp"]) \
 
 df.write.format("mongodb") \
     .mode("append") \
+    .option("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.prices") \
+    .option("database", "binance") \
     .option("collection", "prices") \
     .save()
 
 all_df = spark.read.format("mongodb") \
-    .option("uri", mongo_uri_base) \
+    .option("spark.mongodb.read.connection.uri", mongo_uri_base + "/binance.prices") \
+    .option("database", "binance") \
     .option("collection", "prices") \
     .load() \
     .withColumn("price", col("price").cast("double")) \
@@ -68,9 +72,32 @@ ranking_df.show()
 category_summary.show()
 volatility_df.show()
 
-summary_df.write.format("mongodb").mode("overwrite").option("collection", "summary").save()
-ranking_df.write.format("mongodb").mode("overwrite").option("collection", "ranking").save()
-category_summary.write.format("mongodb").mode("overwrite").option("collection", "category_summary").save()
-volatility_df.write.format("mongodb").mode("overwrite").option("collection", "volatility").save()
+summary_df.write.format("mongodb") \
+    .mode("overwrite") \
+    .option("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.summary") \
+    .option("database", "binance") \
+    .option("collection", "summary") \
+    .save()
+
+ranking_df.write.format("mongodb") \
+    .mode("overwrite") \
+    .option("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.ranking") \
+    .option("database", "binance") \
+    .option("collection", "ranking") \
+    .save()
+
+category_summary.write.format("mongodb") \
+    .mode("overwrite") \
+    .option("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.category_summary") \
+    .option("database", "binance") \
+    .option("collection", "category_summary") \
+    .save()
+
+volatility_df.write.format("mongodb") \
+    .mode("overwrite") \
+    .option("spark.mongodb.write.connection.uri", mongo_uri_base + "/binance.volatility") \
+    .option("database", "binance") \
+    .option("collection", "volatility") \
+    .save()
 
 spark.stop()
