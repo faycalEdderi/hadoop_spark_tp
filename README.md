@@ -16,17 +16,6 @@ Ce projet met en œuvre un pipeline de données complet dans un environnement Bi
 5. Exposition via une API Express.
 6. Visualisation interactive avec React + Recharts.
 
-🧩 Architecture
-
-┌────────────┐     ┌────────┐     ┌────────┐     ┌─────────┐     ┌──────────┐     ┌─────────┐
-│   Binance  │────>│ Python │────>│  HDFS  │────>│  Spark  │────>│ MongoDB  │<───>│ Express │
-└────────────┘     └────────┘     └────────┘     └─────────┘     └──────────┘     └─────────┘
-                                                                                       │
-                                                                                       ▼
-                                                                                 ┌────────────┐
-                                                                                 │   React    │
-                                                                                 │ Dashboard  │
-                                                                                 └────────────┘
 
 🛠️ Technologies utilisées
 
@@ -38,21 +27,6 @@ Ce projet met en œuvre un pipeline de données complet dans un environnement Bi
 - React + Recharts : Dashboard de visualisation
 - Docker & Docker Compose : Environnement conteneurisé complet
 
-📂 Structure du projet
-
-├── docker-compose.yml          # Orchestration des services
-├── app/                        # Scripts Spark
-│   ├── binance_spark.py        # Collecte + traitement Spark → MongoDB
-│   └── hdfs_to_mongo.py        # Lecture HDFS → écriture MongoDB
-├── myhadoop/                   # Scripts Hadoop/Python
-│   ├── binance_to_hdfs.py      # Récupère Binance → écrit CSV → envoie dans HDFS
-│   └── ...
-├── backend/                    # API Express
-│   ├── server.js               # Routes vers MongoDB
-│   └── .env                    # Config MongoDB
-├── frontend/                   # Dashboard React
-│   └── src/App.js              # Visualisations (tableaux, graphiques)
-└── README.txt                  # Ce fichier
 
 ⚙️ Prérequis
 
