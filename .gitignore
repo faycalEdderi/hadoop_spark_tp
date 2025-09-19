@@ -32,7 +32,6 @@ backend/ENV/
 *.eventlog
 
 # Hadoop HDFS and Spark output
-myhadoop/
 hadoop_namenode/
 hadoop_datanode/
 hadoop_historyserver/
