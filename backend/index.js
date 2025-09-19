@@ -8,17 +8,19 @@ app.use(cors());
 app.use(express.json());
 
 const client = new MongoClient(process.env.MONGO_URI);
-let collection;
+
+let db;
 
 async function connectDB() {
   await client.connect();
-  const db = client.db(process.env.MONGO_DB);
-  collection = db.collection(process.env.MONGO_COLLECTION);
+  db = client.db(process.env.MONGO_DB);
+  console.log("✅ Connected to MongoDB");
 }
 connectDB();
 
 app.get('/api/prices', async (req, res) => {
   try {
+    const collection = db.collection(process.env.MONGO_COLLECTION);
     const data = await collection.find({}).sort({ timestamp: -1 }).limit(50).toArray();
     res.json(data);
   } catch (err) {
@@ -26,6 +28,48 @@ app.get('/api/prices', async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log('Backend running on port 5000');
+
+app.get('/api/summary', async (req, res) => {
+  try {
+    const collection = db.collection('summary');
+    const data = await collection.find({}).toArray();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/ranking', async (req, res) => {
+  try {
+    const collection = db.collection('ranking');
+    const data = await collection.find({}).sort({ price_range: -1 }).toArray();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/category_summary', async (req, res) => {
+  try {
+    const collection = db.collection('category_summary');
+    const data = await collection.find({}).toArray();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/volatility', async (req, res) => {
+  try {
+    const collection = db.collection('volatility');
+    const data = await collection.find({}).toArray();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
 });
