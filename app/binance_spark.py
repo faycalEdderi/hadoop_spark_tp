@@ -21,19 +21,16 @@ spark = SparkSession.builder \
     .config("spark.mongodb.write.connection.uri", mongo_uri_base) \
     .getOrCreate()
 
-# Création du snapshot courant
 df = spark.createDataFrame(data, ["symbol", "price", "timestamp"]) \
     .withColumn("timestamp", to_timestamp(col("timestamp"))) \
     .withColumn("price", col("price").cast("double")) \
     .withColumn("category", when(col("symbol").isin(solid), "solid").otherwise("meme"))
 
-# Sauvegarde du snapshot dans MongoDB
 df.write.format("mongodb") \
     .mode("append") \
     .option("collection", "prices") \
     .save()
 
-# Lecture de tous les snapshots pour calculer les stats
 all_df = spark.read.format("mongodb") \
     .option("uri", mongo_uri_base) \
     .option("collection", "prices") \
@@ -71,7 +68,6 @@ ranking_df.show()
 category_summary.show()
 volatility_df.show()
 
-# Sauvegarde des stats
 summary_df.write.format("mongodb").mode("overwrite").option("collection", "summary").save()
 ranking_df.write.format("mongodb").mode("overwrite").option("collection", "ranking").save()
 category_summary.write.format("mongodb").mode("overwrite").option("collection", "category_summary").save()
